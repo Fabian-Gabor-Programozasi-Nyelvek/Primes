@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <math.h>
 #include <windows.h>
-#define LIMIT 1000000
+#define LIMIT 10000000
 
 int is_prime(unsigned long int x) {
     for (unsigned long int i=3; i*i <= x; i += 2) {
@@ -70,6 +70,23 @@ int main() {
     }
 
     printf("\n");
+
+
+
+    FILE *f = fopen("primes.txt", "w");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
+    for (unsigned long i=0; i<floor(limit/2); i++){
+        if (out[i]!=0) fprintf(f, "%lu\n", out[i]);
+    }
+
+    fclose(f);
+
+
 
     return 0;
 }
