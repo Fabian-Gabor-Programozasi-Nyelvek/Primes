@@ -2,11 +2,10 @@
 #include <time.h>
 #include <omp.h>
 #include <math.h>
+#define LIMIT 10000000
 
 int is_prime(unsigned long int x) {
-    unsigned long int half = sqrt(x);
-
-    for (unsigned long int i=3; i <= half; i += 2) {
+    for (unsigned long int i=3; i*i <= x; i += 2) {
         if (x%i == 0) return 0;
     }
     return 1;
@@ -15,7 +14,7 @@ int is_prime(unsigned long int x) {
 int main() {
     double start, end;
     double runTime;
-    unsigned long int prime_count = 2, limit = 100000;
+    unsigned long int prime_count = 2, limit = LIMIT;
     start = omp_get_wtime();
 
     printf("1 2 ");
