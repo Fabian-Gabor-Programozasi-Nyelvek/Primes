@@ -3,7 +3,7 @@
 #include <time.h>
 #include <omp.h>
 #include <math.h>
-#define LIMIT 1000000
+#define LIMIT 100000000
 
 int is_prime(unsigned long int x) {
     //if (x <= 1) return 0; // zero and one are not prime
