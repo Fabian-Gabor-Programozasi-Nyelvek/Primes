@@ -87,7 +87,7 @@ int main() {
     printf("Calculating all prime numbers under %lu.\n",LIMIT);
 
     startCalc = omp_get_wtime();
-    find_primes_brute(); //10000000 in 0.390000
+    find_primes_brute(); // 10000000 in 1.631000
     endCalc = omp_get_wtime();
     runTime = endCalc - startCalc;
     printf("Calculated all %lu prime numbers under %lu in %f seconds with brute force.\n\n",prime_count, LIMIT, runTime);
@@ -96,7 +96,7 @@ int main() {
     prime_count = 0;
 
     startCalc = omp_get_wtime();
-    find_primes_array();  //10000000 in
+    find_primes_array();  // 10000000 in 0.828000
     endCalc = omp_get_wtime();
     runTime = endCalc - startCalc;
     printf("Calculated all %lu prime numbers under %lu in %f seconds with array.\n\n",prime_count, LIMIT, runTime);
