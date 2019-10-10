@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <time.h>
 #include <omp.h>
 #include <pthread.h>
 #include <math.h>
 #include <windows.h>
-#define LIMIT 10000000
+#define LIMIT 100
 
 unsigned long int out[LIMIT]={0},out2[LIMIT]={0};
 unsigned long int prime_count = 0;
@@ -21,13 +22,31 @@ int is_prime(unsigned long int x) {
     return 1;
 }
 
-int is_prime_array(unsigned long int x) {
+int is_prime_array (unsigned long int x) {
     unsigned long int i=0;
     while ((i<prime_count)&&(out2[i]*out2[i]<=x)) {
         if (out2[i] == 0) return 0;
         if (x % out2[i] == 0) return 0;
         i++;
+    }    
+    return 1;
+}
+
+int is_prime_array_parallel (unsigned long int x) {
+    boolean unprime = false;
+    #pragma omp parallel default(none) shared(out2, unprime, prime_count, x)
+    {
+        #pragma omp for
+            for (unsigned long int i=0; i<prime_count; i++) {
+                if (x % out2[i] == 0) {
+                    unprime = true;
+                    #pragma omp cancel for
+                }
+                #pragma omp cancellation point for
+            }
     }
+
+    if (unprime) return 0;
     return 1;
 }
 
@@ -77,6 +96,24 @@ void find_primes_array () {
     }
 }
 
+void find_primes_array_parallel () {
+    if (LIMIT >= 2) {
+        out2[0] = 2;
+        prime_count++;
+    }
+
+    //#pragma omp parallel
+    {
+        //#pragma omp for schedule (runtime)
+            for (unsigned long int i=3; i<LIMIT; i += 2) {
+                if (is_prime_array_parallel(i)) {
+                    out2[prime_count] = i;
+                    prime_count++;
+                }
+            }
+    }
+}
+
 int main() {
     double startCalc, endCalc;
     double runTime;    
@@ -90,7 +127,7 @@ int main() {
     find_primes_brute(); // 10000000 in 1.631000
     endCalc = omp_get_wtime();
     runTime = endCalc - startCalc;
-    printf("Calculated all %lu prime numbers under %lu in %f seconds with brute force.\n\n",prime_count, LIMIT, runTime);
+    printf("Calculated all %lu prime numbers under %lu in %f seconds with brute force.\n",prime_count, LIMIT, runTime);
 
 
     prime_count = 0;
@@ -99,7 +136,15 @@ int main() {
     find_primes_array();  // 10000000 in 0.828000
     endCalc = omp_get_wtime();
     runTime = endCalc - startCalc;
-    printf("Calculated all %lu prime numbers under %lu in %f seconds with array.\n\n",prime_count, LIMIT, runTime);
+    printf("Calculated all %lu prime numbers under %lu in %f seconds with array.\n",prime_count, LIMIT, runTime);
+
+    prime_count = 0;
+
+    startCalc = omp_get_wtime();
+    find_primes_array_parallel();  // 10000000
+    endCalc = omp_get_wtime();
+    runTime = endCalc - startCalc;
+    printf("Calculated all %lu prime numbers under %lu in %f seconds with array in parallel.\n\n",prime_count, LIMIT, runTime);
 
     //print_primes(out);
     //qsort(out, prime_count, sizeof(out[0]), cmpfunc);
